@@ -704,4 +704,7 @@ PHP_Laravel12_Breadcrumbs/
 ---
 
 Your PHP_Laravel12_Breadcrumbs Project is now ready!
+<<<<<<< HEAD
 
+=======
+>>>>>>> development

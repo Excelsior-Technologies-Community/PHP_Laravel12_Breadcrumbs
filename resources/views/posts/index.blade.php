@@ -1,50 +1,63 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>All Posts - Laravel Breadcrumbs</title>
+    <title>Posts</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f9fafd;
-        }
-
-        .card {
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        }
-
-        a {
-            text-decoration: none;
-            color: #0d6efd;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-    </style>
 </head>
-
 <body>
-    <div class="container py-5">
-        <h1 class="mb-4 text-center">All Posts</h1>
 
-        <div class="row g-4">
-            @foreach($posts as $post)
-            <div class="col-md-6 col-lg-4">
-                <div class="card p-3">
-                    <h5 class="card-title">
-                        <a href="{{ route('posts.show', $post->id) }}">{{ $post->title }}</a>
-                    </h5>
-                    <p class="text-muted">{{ Str::limit($post->content, 80) }}</p>
-                    <p class="mb-0"><small>Category: <a href="{{ route('categories.show', $post->category->id) }}">{{ $post->category->name }}</a></small></p>
-                </div>
-            </div>
-            @endforeach
+<div class="container py-5">
+
+    <h1 class="mb-4">All Posts</h1>
+
+    <!-- FLASH MESSAGE -->
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-    </div>
-</body>
+    @endif
 
+    <!-- SEARCH -->
+    <form method="GET" class="mb-4 d-flex">
+        <input type="text" name="search" class="form-control me-2" placeholder="Search..." value="{{ request('search') }}">
+        <button class="btn btn-primary">Search</button>
+    </form>
+
+    <a href="{{ route('posts.trash') }}" class="btn btn-warning mb-3">View Trash</a>
+
+    <div class="row">
+        @forelse($posts as $post)
+        <div class="col-md-4 mb-3">
+            <div class="card p-3">
+                <h5>
+                    <a href="{{ route('posts.show', $post->slug) }}">
+                        {{ $post->title }}
+                    </a>
+                </h5>
+
+                <p>{{ Str::limit($post->content, 80) }}</p>
+
+                <small>Category: {{ $post->category->name ?? 'N/A' }}</small>
+
+                <form action="{{ route('posts.delete', $post->id) }}" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <button class="btn btn-danger btn-sm mt-2">Delete</button>
+                </form>
+            </div>
+        </div>
+        @empty
+            <p class="text-center">No posts found.</p>
+        @endforelse
+    </div>
+
+    <!-- PAGINATION -->
+    {{ $posts->links() }}
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
 </html>
