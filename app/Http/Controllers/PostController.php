@@ -3,33 +3,43 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Models\Category;
 use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
-    // LIST + SEARCH + PAGINATION
     public function index(Request $request)
     {
         $query = Post::with('category');
 
-        if ($request->search) {
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->category_id);
+        }
+
+        if ($request->filled('search')) {
             $query->where('title', 'like', '%' . $request->search . '%');
         }
 
         $posts = $query->latest()->paginate(4);
+        $categories = Category::all();
 
-        return view('posts.index', compact('posts'));
+        return view('posts.index', compact('posts', 'categories'));
     }
 
-    // SHOW BY SLUG
+    public function getSuggestions(Request $request)
+    {
+        $term = $request->get('term');
+        return Post::where('title', 'like', '%' . $term . '%')
+                   ->limit(5)
+                   ->pluck('title');
+    }
+
     public function show($slug)
     {
         $post = Post::where('slug', $slug)->firstOrFail();
         return view('posts.show', compact('post'));
     }
 
-
-    // TRASH LIST
     public function trash()
     {
         $posts = Post::onlyTrashed()->get();
